@@ -1,13 +1,13 @@
 import { Header } from '@/components/layout/Header';
-import { HeroSection } from '@/components/home/HeroSection';
+import { BrowseView } from '@/components/browse/BrowseView';
 
-const Index = () => {
+const Browse = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <HeroSection />
+      <BrowseView />
     </div>
   );
 };
 
-export default Index;
+export default Browse;
