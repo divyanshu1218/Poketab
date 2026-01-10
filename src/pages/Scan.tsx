@@ -1,13 +1,13 @@
 import { Header } from '@/components/layout/Header';
-import { HeroSection } from '@/components/home/HeroSection';
+import { ScannerView } from '@/components/scanner/ScannerView';
 
-const Index = () => {
+const Scan = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <HeroSection />
+      <ScannerView />
     </div>
   );
 };
 
-export default Index;
+export default Scan;
