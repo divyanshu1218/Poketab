@@ -1,0 +1,234 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Dark futuristic theme */
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 8%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 8%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Electric cyan primary */
+    --primary: 190 100% 50%;
+    --primary-foreground: 222 47% 6%;
+
+    /* Subtle blue-gray secondary */
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 12%;
+    --muted-foreground: 215 20% 55%;
+
+    --accent: 190 100% 50%;
+    --accent-foreground: 222 47% 6%;
+
+    /* Pokémon red for destructive/danger */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 33% 20%;
+    --input: 217 33% 17%;
+    --ring: 190 100% 50%;
+
+    --radius: 0.75rem;
+
+    /* Custom Pokétab colors */
+    --poketab-glow: 190 100% 50%;
+    --poketab-red: 0 72% 51%;
+    --poketab-yellow: 45 100% 51%;
+    --poketab-green: 142 71% 45%;
+    --poketab-purple: 270 70% 60%;
+    --poketab-orange: 25 95% 53%;
+    
+    /* Glassmorphism */
+    --glass: 222 47% 12% / 0.7;
+    --glass-border: 190 100% 50% / 0.2;
+    --glass-glow: 190 100% 50% / 0.15;
+
+    /* Sidebar (keeping for compatibility) */
+    --sidebar-background: 222 47% 6%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 190 100% 50%;
+    --sidebar-primary-foreground: 222 47% 6%;
+    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 33% 20%;
+    --sidebar-ring: 190 100% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+
+  code, .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+@layer utilities {
+  /* Glassmorphism card */
+  .glass-card {
+    @apply relative overflow-hidden rounded-xl;
+    background: hsl(var(--glass));
+    backdrop-filter: blur(20px);
+    border: 1px solid hsl(var(--glass-border));
+    box-shadow: 
+      0 0 30px hsl(var(--glass-glow)),
+      inset 0 1px 0 hsl(190 100% 50% / 0.1);
+  }
+
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      hsl(190 100% 50% / 0.08) 0%,
+      transparent 50%,
+      hsl(270 70% 60% / 0.05) 100%
+    );
+    pointer-events: none;
+  }
+
+  /* Neon glow text */
+  .neon-text {
+    text-shadow: 
+      0 0 10px hsl(var(--primary) / 0.8),
+      0 0 20px hsl(var(--primary) / 0.6),
+      0 0 40px hsl(var(--primary) / 0.4);
+  }
+
+  /* Animated gradient background */
+  .gradient-bg {
+    background: 
+      radial-gradient(ellipse at 20% 20%, hsl(190 100% 50% / 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, hsl(270 70% 60% / 0.1) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, hsl(0 72% 51% / 0.05) 0%, transparent 60%),
+      hsl(var(--background));
+  }
+
+  /* Scanner pulse animation */
+  .scanner-pulse {
+    animation: scanner-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes scanner-pulse {
+    0%, 100% {
+      box-shadow: 
+        0 0 20px hsl(var(--primary) / 0.4),
+        inset 0 0 20px hsl(var(--primary) / 0.1);
+    }
+    50% {
+      box-shadow: 
+        0 0 40px hsl(var(--primary) / 0.6),
+        inset 0 0 30px hsl(var(--primary) / 0.2);
+    }
+  }
+
+  /* Stat bar animation */
+  .stat-bar {
+    @apply relative h-3 rounded-full overflow-hidden;
+    background: hsl(var(--muted));
+  }
+
+  .stat-bar-fill {
+    @apply h-full rounded-full transition-all duration-1000 ease-out;
+    box-shadow: 0 0 10px currentColor;
+  }
+
+  /* Floating animation */
+  .float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+
+  /* Scan line effect */
+  .scan-line {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .scan-line::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, hsl(var(--primary)), transparent);
+    animation: scan 3s ease-in-out infinite;
+  }
+
+  @keyframes scan {
+    0% { top: 0; opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { top: 100%; opacity: 1; }
+  }
+
+  /* Pokémon type colors */
+  .type-normal { @apply bg-gray-500; }
+  .type-fire { background: hsl(var(--poketab-orange)); }
+  .type-water { @apply bg-blue-500; }
+  .type-electric { background: hsl(var(--poketab-yellow)); }
+  .type-grass { background: hsl(var(--poketab-green)); }
+  .type-ice { @apply bg-cyan-400; }
+  .type-fighting { @apply bg-red-700; }
+  .type-poison { background: hsl(var(--poketab-purple)); }
+  .type-ground { @apply bg-amber-600; }
+  .type-flying { @apply bg-indigo-400; }
+  .type-psychic { @apply bg-pink-500; }
+  .type-bug { @apply bg-lime-500; }
+  .type-rock { @apply bg-yellow-700; }
+  .type-ghost { @apply bg-purple-700; }
+  .type-dragon { @apply bg-indigo-600; }
+  .type-dark { @apply bg-gray-700; }
+  .type-steel { @apply bg-gray-400; }
+  .type-fairy { @apply bg-pink-400; }
+
+  /* Custom Scrollbar Styles */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.5);
+    border-radius: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.7);
+  }
+
+  /* Firefox scrollbar */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--primary) / 0.5) transparent;
+  }
+}
