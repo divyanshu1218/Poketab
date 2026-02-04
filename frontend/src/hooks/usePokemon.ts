@@ -23,7 +23,7 @@ export const usePokemonSearch = (query: string) => {
   return useQuery<Pokemon[], Error>({
     queryKey: ['pokemonSearch', query],
     queryFn: () => searchPokemon(query),
-    enabled: query.length >= 2,
+    enabled: query.trim().length >= 1,
     staleTime: 1000 * 60 * 5,
   });
 };

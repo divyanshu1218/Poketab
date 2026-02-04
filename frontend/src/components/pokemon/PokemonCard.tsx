@@ -1,13 +1,25 @@
 import { motion } from 'framer-motion';
+import { Check, Plus } from 'lucide-react';
 import { Pokemon, getTypeColor, formatPokemonId } from '@/services/pokemonService';
+import { Button } from '@/components/ui/button';
 
 interface PokemonCardProps {
   pokemon: Pokemon;
   onClick?: () => void;
   delay?: number;
+  onAddToCollection?: () => void;
+  isAdding?: boolean;
+  isAdded?: boolean;
 }
 
-export const PokemonCard = ({ pokemon, onClick, delay = 0 }: PokemonCardProps) => {
+export const PokemonCard = ({
+  pokemon,
+  onClick,
+  delay = 0,
+  onAddToCollection,
+  isAdding = false,
+  isAdded = false,
+}: PokemonCardProps) => {
   const mainType = pokemon.types[0]?.type.name || 'normal';
   const typeColor = getTypeColor(mainType);
   
@@ -66,6 +78,34 @@ export const PokemonCard = ({ pokemon, onClick, delay = 0 }: PokemonCardProps) =
       <h3 className="relative text-center font-bold text-foreground capitalize text-lg tracking-wide group-hover:text-primary transition-colors">
         {pokemon.name}
       </h3>
+
+      {/* Add to collection */}
+      {onAddToCollection && (
+        <div className="relative mt-3">
+          <Button
+            variant={isAdded ? 'outline' : 'hero'}
+            size="sm"
+            className="w-full gap-2"
+            onClick={(e) => {
+              e.stopPropagation();
+              onAddToCollection();
+            }}
+            disabled={isAdding || isAdded}
+          >
+            {isAdded ? (
+              <>
+                <Check className="w-4 h-4" />
+                Added
+              </>
+            ) : (
+              <>
+                <Plus className="w-4 h-4" />
+                {isAdding ? 'Adding...' : 'Add to Collection'}
+              </>
+            )}
+          </Button>
+        </div>
+      )}
     </motion.div>
   );
 };

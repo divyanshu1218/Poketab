@@ -34,31 +34,46 @@ class GeminiService:
         Examples of valid responses: 'pikachu', 'charizard', 'mewtwo', 'unknown'
         """
         
-        # Generate response using the new API
-        response = self.client.models.generate_content(
-            model=self.model_id,
-            contents=[
-                types.Content(
-                    role="user",
-                    parts=[
-                        types.Part.from_text(text=prompt),
-                        types.Part.from_bytes(
-                            data=image_bytes,
-                            mime_type="image/jpeg"
-                        )
-                    ]
-                )
-            ]
-        )
-        
-        # Extract and clean the response
-        pokemon_name = response.text.strip().lower()
-        
-        # Validate response
-        if pokemon_name == 'unknown' or not pokemon_name:
+        try:
+            # Generate response using the new API
+            response = self.client.models.generate_content(
+                model=self.model_id,
+                contents=[
+                    types.Content(
+                        role="user",
+                        parts=[
+                            types.Part.from_text(text=prompt),
+                            types.Part.from_bytes(
+                                data=image_bytes,
+                                mime_type="image/jpeg"
+                            )
+                        ]
+                    )
+                ]
+            )
+            
+            # Extract and clean the response
+            pokemon_name = response.text.strip().lower()
+            
+            # Remove any extra punctuation or special characters that might be included
+            import re
+            # Keep only alphabetic characters and hyphens (for pokemon like tapu-koko)
+            pokemon_name = re.sub(r'[^a-z\-\s]', '', pokemon_name).strip()
+            # Replace multiple spaces/hyphens with single ones
+            pokemon_name = re.sub(r'[\s\-]+', '-', pokemon_name)
+            
+            print(f"[DEBUG] Gemini response (cleaned): '{pokemon_name}'")
+            
+            # Validate response
+            if pokemon_name == 'unknown' or not pokemon_name:
+                return None
+            
+            return pokemon_name
+        except Exception as e:
+            print(f"[DEBUG] Gemini identification error: {e}")
+            import traceback
+            traceback.print_exc()
             return None
-        
-        return pokemon_name
 
 
 # Singleton instance

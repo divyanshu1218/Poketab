@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
 const loginSchema = z.object({
-    username: z.string().min(1, 'Username or email is required'),
+    email: z.string().min(1, 'Username or email is required'),
     password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
@@ -39,16 +39,16 @@ export const LoginForm = ({ onSubmit, error, loading }: LoginFormProps) => {
             )}
 
             <div className="space-y-2">
-                <Label htmlFor="username">Username or Email</Label>
+                <Label htmlFor="email">Username or Email</Label>
                 <Input
-                    id="username"
+                    id="email"
                     type="text"
                     placeholder="ash@pokemon.com or username"
-                    {...register('username')}
+                    {...register('email')}
                     disabled={loading}
                 />
-                {errors.username && (
-                    <p className="text-sm text-destructive">{errors.username.message}</p>
+                {errors.email && (
+                    <p className="text-sm text-destructive">{errors.email.message}</p>
                 )}
             </div>
 

@@ -6,10 +6,13 @@ from functools import lru_cache
 # This allows Python to trust certificates that Windows trusts (e.g., corporate proxies)
 try:
     import certifi_win32
-    # Patch certifi to include Windows Certificate Store
-    certifi_win32.wincerts.install()
-except ImportError:
-    # If not installed, will use default certifi (may fail with corporate proxies)
+    # Patch certifi to include Windows Certificate Store (API varies by version)
+    if hasattr(certifi_win32, "install"):
+        certifi_win32.install()
+    elif hasattr(certifi_win32, "wincerts") and hasattr(certifi_win32.wincerts, "install"):
+        certifi_win32.wincerts.install()
+except Exception:
+    # If not installed or API changed, fall back to default certifi
     pass
 
 
@@ -23,11 +26,13 @@ class PokeAPIService:
         headers = {
             'User-Agent': 'PokeTab/1.0 (Python/httpx)'
         }
+        # Disable SSL verification for PokeAPI (public API, safe for dev)
+        # On Windows, SSL certificate verification can fail even with certifi-win32
         self.client = httpx.AsyncClient(
             timeout=30.0,
             follow_redirects=True,
-            headers=headers
-            # verify=True is default - uses certifi (now patched with Windows certs)
+            headers=headers,
+            verify=False  # Disable SSL verification for PokeAPI (public API)
         )
     
     @lru_cache(maxsize=500)
@@ -49,13 +54,19 @@ class PokeAPIService:
             Dictionary with Pokémon data or None if not found
         """
         try:
-            url = f"{self.BASE_URL}/pokemon/{pokemon_name.lower()}"
-            print(f"[DEBUG] Fetching from PokeAPI: {url}")
-            response = await self.client.get(url)
+            # Clean the pokemon name - replace spaces with hyphens as PokeAPI uses that format
+            clean_name = pokemon_name.strip().lower().replace(' ', '-')
+            url = f"{self.BASE_URL}/pokemon/{clean_name}"
+            print(f"[DEBUG PokeAPI] Fetching from: {url}")
+            print(f"[DEBUG PokeAPI] Clean name: '{clean_name}' (from input: '{pokemon_name}')")
             
-            print(f"[DEBUG] PokeAPI response status: {response.status_code}")
+            response = await self.client.get(url)
+            print(f"[DEBUG PokeAPI] Response status: {response.status_code}")
+            print(f"[DEBUG PokeAPI] Response URL: {response.url}")
+            
             if response.status_code == 200:
                 data = response.json()
+                print(f"[DEBUG PokeAPI] Successfully received data for {data.get('name')}")
                 
                 # Parse and structure the data - keep PokeAPI's nested structure
                 pokemon_data = {
@@ -103,14 +114,15 @@ class PokeAPIService:
                     "species_url": data.get("species", {}).get("url")
                 }
                 
+                print(f"[DEBUG PokeAPI] Successfully fetched Pokemon data: {pokemon_data.get('name')}")
                 return pokemon_data
             else:
-                print(f"PokeAPI returned status {response.status_code} for {pokemon_name}")
+                print(f"[DEBUG PokeAPI] Error: Got status {response.status_code}")
+                print(f"[DEBUG PokeAPI] Response body: {response.text[:500]}")
                 return None
                 
         except Exception as e:
-            print(f"Error fetching Pokémon data from PokeAPI: {e}")
-            print(f"Error type: {type(e).__name__}")
+            print(f"[DEBUG PokeAPI] Exception occurred: {type(e).__name__}: {e}")
             import traceback
             traceback.print_exc()
             return None

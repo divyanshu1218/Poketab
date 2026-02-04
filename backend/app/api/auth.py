@@ -4,7 +4,7 @@ from sqlalchemy import select
 from app.database import get_db
 from app.models.user import User
 from app.schemas.user import UserCreate, UserLogin, UserResponse, Token
-from app.core.security import verify_password, get_password_hash, create_access_token, create_refresh_token
+from app.core.security import verify_password, get_password_hash, validate_password, create_access_token, create_refresh_token
 from app.core.dependencies import get_current_active_user
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -30,9 +30,10 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
             detail="Email already registered"
         )
     
+    # Validate password
+    validate_password(user_data.password)
+    
     # Create new user
-    print("PASSWORD:", user_data.password, type(user_data.password), len(user_data.password))
-
     hashed_password = get_password_hash(user_data.password)
     new_user = User(
         username=user_data.username,
@@ -52,11 +53,11 @@ async def login(user_data: UserLogin, db: AsyncSession = Depends(get_db)):
     """Login user and return JWT tokens"""
     
     # Try to find user by email first, then by username
-    # Check if the username field contains an @ (likely an email)
-    if "@" in user_data.username:
-        result = await db.execute(select(User).where(User.email == user_data.username))
+    # Check if the email field contains an @ (likely an email)
+    if "@" in user_data.email:
+        result = await db.execute(select(User).where(User.email == user_data.email))
     else:
-        result = await db.execute(select(User).where(User.username == user_data.username))
+        result = await db.execute(select(User).where(User.username == user_data.email))
     
     user = result.scalar_one_or_none()
     

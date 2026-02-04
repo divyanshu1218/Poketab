@@ -78,16 +78,39 @@ export const fetchPokemonList = async (limit: number = 20, offset: number = 0): 
   return response.json();
 };
 
+let cachedPokemonList: PokemonListItem[] | null = null;
+let cachedPokemonListPromise: Promise<PokemonListItem[]> | null = null;
+
+const getPokemonListCached = async (): Promise<PokemonListItem[]> => {
+  if (cachedPokemonList) return cachedPokemonList;
+  if (cachedPokemonListPromise) return cachedPokemonListPromise;
+
+  cachedPokemonListPromise = fetch(`${POKEAPI_BASE}/pokemon?limit=2000`)
+    .then((res) => res.json())
+    .then((list: PokemonListResponse) => {
+      cachedPokemonList = list.results;
+      return list.results;
+    })
+    .finally(() => {
+      cachedPokemonListPromise = null;
+    });
+
+  return cachedPokemonListPromise;
+};
+
 export const searchPokemon = async (query: string): Promise<Pokemon[]> => {
-  // Fetch all pokemon names to search through
-  const listResponse = await fetch(`${POKEAPI_BASE}/pokemon?limit=1000`);
-  const list: PokemonListResponse = await listResponse.json();
+  const normalized = query.trim().toLowerCase();
+  if (!normalized) return [];
 
-  const matches = list.results
-    .filter(p => p.name.toLowerCase().includes(query.toLowerCase()))
-    .slice(0, 12);
+  const list = await getPokemonListCached();
+  const startsWith = list.filter((p) => p.name.startsWith(normalized));
+  const contains = list.filter(
+    (p) => !p.name.startsWith(normalized) && p.name.includes(normalized)
+  );
 
-  const pokemonPromises = matches.map(p =>
+  const matches = [...startsWith, ...contains].slice(0, 12);
+
+  const pokemonPromises = matches.map((p) =>
     fetchPokemon(p.name).catch(() => null)
   );
 

@@ -1,4 +1,4 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List
 
 
@@ -37,25 +37,16 @@ class Settings(BaseSettings):
     @property
     def DATABASE_URL(self):
         """Construct database URL using SQLAlchemy URL object"""
-        from sqlalchemy.engine import URL
-        return URL.create(
-            drivername="mysql+aiomysql",
-            username=self.DB_USER,
-            password=self.DB_PASSWORD,
-            host=self.DB_HOST,
-            port=self.DB_PORT,
-            database=self.DB_NAME,
-            query={"charset": "utf8mb4"}
-        )
+        # Using SQLite as fallback since MySQL is not available
+        from sqlalchemy.engine import make_url
+        return make_url("sqlite+aiosqlite:///./poketab.db")
     
     @property
     def CORS_ORIGINS_LIST(self) -> List[str]:
         """Parse CORS origins into list"""
         return [origin.strip() for origin in self.CORS_ORIGINS.split(",")]
     
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 
 
 settings = Settings()

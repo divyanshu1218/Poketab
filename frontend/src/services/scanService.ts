@@ -18,11 +18,7 @@ export const scanService = {
         });
 
         try {
-            const response = await apiClient.post<Pokemon>('/pokemon/scan', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
+            const response = await apiClient.post<Pokemon>('/pokemon/scan', formData);
 
             console.log('[DEBUG] Scan response:', response.data);
             return response.data;

@@ -47,18 +47,21 @@ async def scan_pokemon(
     
     # Step 2: Identify Pokémon using Gemini
     pokemon_name = await gemini_service.identify_pokemon(processed_image)
-    print(f"[DEBUG] Gemini identified Pokemon: {pokemon_name}")
+    print(f"[DEBUG SCAN] Gemini identified Pokemon: '{pokemon_name}'")
+    print(f"[DEBUG SCAN] Pokemon name length: {len(pokemon_name) if pokemon_name else 'None'}")
+    print(f"[DEBUG SCAN] Pokemon name bytes: {pokemon_name.encode() if pokemon_name else 'None'}")
     
     if not pokemon_name:
-        print("[DEBUG] Gemini failed to identify a Pokemon in the image")
+        print("[DEBUG SCAN] Gemini failed to identify a Pokemon in the image")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Could not identify a Pokémon in the image"
         )
     
     # Step 3: Fetch Pokémon data from PokeAPI
+    print(f"[DEBUG SCAN] Fetching PokeAPI data for: '{pokemon_name}'")
     pokemon_data = await pokeapi_service.get_pokemon_data(pokemon_name)
-    print(f"[DEBUG] PokeAPI data fetched: {pokemon_data is not None}")
+    print(f"[DEBUG SCAN] PokeAPI returned data: {pokemon_data is not None}")
     
     if not pokemon_data:
         print(f"[DEBUG] PokeAPI failed to find Pokemon: {pokemon_name}")
@@ -88,3 +91,24 @@ async def search_pokemon(
         )
     
     return pokemon_data
+
+
+@router.get("/test-pokeapi", tags=["Debug"])
+async def test_pokeapi():
+    """Test endpoint to verify PokeAPI connectivity"""
+    import httpx
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get("https://pokeapi.co/api/v2/pokemon/pikachu")
+            return {
+                "status": response.status_code,
+                "url": str(response.url),
+                "content_length": len(response.content),
+                "success": response.status_code == 200,
+                "sample_data": response.json()[:100] if response.status_code == 200 else response.text[:100]
+            }
+    except Exception as e:
+        return {
+            "error": str(e),
+            "error_type": type(e).__name__
+        }

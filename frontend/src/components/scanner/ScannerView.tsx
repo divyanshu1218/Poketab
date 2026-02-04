@@ -45,8 +45,8 @@ export const ScannerView = () => {
         title: 'Success!',
         description: `Identified ${result.name}!`,
       });
-    } catch (error: any) {
-      const message = error.response?.data?.detail || 'Failed to identify Pokémon';
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail || 'Failed to identify Pokémon';
       toast({
         title: 'Scan failed',
         description: message,
@@ -108,8 +108,8 @@ export const ScannerView = () => {
         title: 'Added to collection!',
         description: `${scannedPokemon.name} has been added to your collection`,
       });
-    } catch (error: any) {
-      const message = error.response?.data?.detail || 'Failed to add to collection';
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail || 'Failed to add to collection';
       toast({
         title: 'Error',
         description: message,

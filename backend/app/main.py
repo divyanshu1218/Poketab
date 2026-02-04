@@ -30,12 +30,8 @@ app = FastAPI(
 print(f"Configuring CORS with origins: {settings.CORS_ORIGINS_LIST}")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:8080",
-        "http://localhost:8081",
-        "http://127.0.0.1:8080",
-        "http://127.0.0.1:8081",
-    ],
+    allow_origins=settings.CORS_ORIGINS_LIST,
+    allow_origin_regex=r"^http://(localhost|127\.0\.0\.1)(:\d+)?$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -61,6 +57,28 @@ async def root():
 async def health_check():
     """Health check endpoint"""
     return {"status": "healthy"}
+
+
+@app.get("/__whoami")
+async def whoami():
+    """Debug endpoint to confirm the running server and config."""
+    try:
+        import bcrypt
+        bcrypt_version = getattr(bcrypt, "__version__", "unknown")
+    except Exception:
+        bcrypt_version = "unavailable"
+    try:
+        import passlib
+        passlib_version = getattr(passlib, "__version__", "unknown")
+    except Exception:
+        passlib_version = "unavailable"
+    return {
+        "app": "poketab-backend",
+        "api_prefix": settings.API_V1_PREFIX,
+        "cors_origins": settings.CORS_ORIGINS_LIST,
+        "bcrypt_version": bcrypt_version,
+        "passlib_version": passlib_version,
+    }
 
 
 if __name__ == "__main__":

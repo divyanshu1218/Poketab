@@ -7,6 +7,8 @@ import { usePokemonList, usePokemonSearch, usePokemon } from '@/hooks/usePokemon
 import { Pokemon } from '@/services/pokemonService';
 import { PokemonCard } from '@/components/pokemon/PokemonCard';
 import { PokemonDetail } from '@/components/pokemon/PokemonDetail';
+import { collectionService } from '@/services/collectionService';
+import { useToast } from '@/hooks/use-toast';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -17,6 +19,9 @@ export const BrowseView = () => {
   const [pokemonData, setPokemonData] = useState<Pokemon[]>([]);
   const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
   const [isLoadingPokemon, setIsLoadingPokemon] = useState(false);
+  const [addingIds, setAddingIds] = useState<Record<number, boolean>>({});
+  const [addedIds, setAddedIds] = useState<Record<number, boolean>>({});
+  const { toast } = useToast();
 
   // Debounce search query
   useEffect(() => {
@@ -50,6 +55,33 @@ export const BrowseView = () => {
   const isLoading = isLoadingList || isLoadingPokemon || isSearching;
   const totalCount = listData?.count || 0;
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
+
+  const handleAddToCollection = async (pokemon: Pokemon) => {
+    if (!pokemon || addingIds[pokemon.id] || addedIds[pokemon.id]) return;
+
+    setAddingIds((prev) => ({ ...prev, [pokemon.id]: true }));
+    try {
+      await collectionService.addToCollection({
+        pokemon_name: pokemon.name,
+        pokemon_id: pokemon.id,
+        pokemon_data: pokemon,
+      });
+      setAddedIds((prev) => ({ ...prev, [pokemon.id]: true }));
+      toast({
+        title: 'Added to collection!',
+        description: `${pokemon.name} has been added to your collection`,
+      });
+    } catch (error: any) {
+      const message = error.response?.data?.detail || 'Failed to add to collection';
+      toast({
+        title: 'Error',
+        description: message,
+        variant: 'destructive',
+      });
+    } finally {
+      setAddingIds((prev) => ({ ...prev, [pokemon.id]: false }));
+    }
+  };
 
   return (
     <div className="min-h-screen gradient-bg pt-32 pb-16 px-4">
@@ -113,6 +145,9 @@ export const BrowseView = () => {
                   key={pokemon.id}
                   pokemon={pokemon}
                   onClick={() => setSelectedPokemon(pokemon)}
+                  onAddToCollection={() => handleAddToCollection(pokemon)}
+                  isAdding={!!addingIds[pokemon.id]}
+                  isAdded={!!addedIds[pokemon.id]}
                   delay={i}
                 />
               ))}
