@@ -142,6 +142,30 @@ npm run dev
 
 ---
 
+## 🚀 Deployment
+
+### Backend (Render)
+1. Ensure `backend/requirements.txt` is up to date and commit your changes.
+2. Render will use `render.yaml` automatically, or configure:
+   - Root directory: `backend`
+   - Build: `pip install -r requirements.txt`
+   - Start: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+3. Set environment variables on Render:
+   - `SECRET_KEY`
+   - `GEMINI_API_KEY`
+   - `CORS_ORIGINS` (set to your Netlify URL)
+   - `API_V1_PREFIX=/api/v1`
+
+### Frontend (Netlify)
+1. Netlify will use `frontend/netlify.toml`, or configure:
+   - Base directory: `frontend`
+   - Build: `npm run build`
+   - Publish: `dist`
+2. Set environment variable:
+   - `VITE_API_BASE_URL=https://<your-render-service>.onrender.com/api/v1`
+
+---
+
 ## 🔗 API Routes
 
 Once the backend is running, you can access the interactive API documentation:
