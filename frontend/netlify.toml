@@ -1,7 +1,7 @@
 [build]
   base = "frontend"
-  command = "rm -rf node_modules && npm install --legacy-peer-deps --no-audit --no-fund --include=optional && npm run build"
+  command = "rm -rf node_modules package-lock.json && npm install --legacy-peer-deps --no-audit --no-fund && npm install @rollup/rollup-linux-x64-gnu@4.24.0 --no-save && npm run build"
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "20.11.1"
+  NODE_VERSION = "20.19.4"
