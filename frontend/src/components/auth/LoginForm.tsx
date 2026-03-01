@@ -27,14 +27,20 @@ export const LoginForm = ({ onSubmit, error, loading }: LoginFormProps) => {
         formState: { errors },
     } = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
+        mode: 'onBlur', // Validate on blur to avoid interference
     });
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" autoComplete="off">
             {error && (
                 <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>{error}</AlertDescription>
+                    <AlertDescription>
+                        {error}
+                        {error.includes('Incorrect') && (
+                            <p className="text-xs mt-1">Check your username/email and password</p>
+                        )}
+                    </AlertDescription>
                 </Alert>
             )}
 
@@ -44,6 +50,7 @@ export const LoginForm = ({ onSubmit, error, loading }: LoginFormProps) => {
                     id="email"
                     type="text"
                     placeholder="ash@pokemon.com or username"
+                    autoComplete="off"
                     {...register('email')}
                     disabled={loading}
                 />
@@ -58,6 +65,7 @@ export const LoginForm = ({ onSubmit, error, loading }: LoginFormProps) => {
                     id="password"
                     type="password"
                     placeholder="••••••••"
+                    autoComplete="off"
                     {...register('password')}
                     disabled={loading}
                 />

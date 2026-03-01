@@ -8,6 +8,10 @@ class ApiClient {
         this.client = axios.create({
             baseURL: API_CONFIG.BASE_URL,
             timeout: API_CONFIG.TIMEOUT,
+            withCredentials: false,
+            headers: {
+                'Content-Type': 'application/json',
+            },
         });
 
         this.setupInterceptors();
@@ -24,6 +28,7 @@ class ApiClient {
                 return config;
             },
             (error) => {
+                console.error('Request interceptor error:', error);
                 return Promise.reject(error);
             }
         );
@@ -47,11 +52,20 @@ class ApiClient {
                             window.location.href = '/login';
                         }
                     } catch (refreshError) {
+                        console.error('Token refresh failed:', refreshError);
                         this.clearTokens();
                         window.location.href = '/login';
                         return Promise.reject(refreshError);
                     }
                 }
+
+                // Enhanced error logging for debugging
+                console.error('API Response Error:', {
+                    status: error.response?.status,
+                    data: error.response?.data,
+                    message: error.message,
+                    url: error.config?.url,
+                });
 
                 return Promise.reject(error);
             }

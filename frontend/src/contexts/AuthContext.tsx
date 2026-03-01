@@ -53,11 +53,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
             setError(null);
             setLoading(true);
+            console.log('Attempting login with:', { email: data.email });
             await authService.login(data);
             const userData = await authService.getCurrentUser();
             setUser(userData);
+            console.log('Login successful');
         } catch (err: any) {
-            const message = err.response?.data?.detail || 'Login failed';
+            console.error('Login error:', err);
+            const message = err.response?.data?.detail || err.message || 'Login failed';
             setError(message);
             throw new Error(message);
         } finally {
@@ -69,11 +72,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
             setError(null);
             setLoading(true);
+            console.log('Attempting registration with:', { email: data.email, username: data.username });
             await authService.register(data);
+            console.log('Registration successful, attempting auto-login');
             // Auto-login after registration
             await login({ email: data.email, password: data.password });
         } catch (err: any) {
-            const message = err.response?.data?.detail || 'Registration failed';
+            console.error('Registration error:', err);
+            const message = err.response?.data?.detail || err.message || 'Registration failed';
             setError(message);
             throw new Error(message);
         } finally {

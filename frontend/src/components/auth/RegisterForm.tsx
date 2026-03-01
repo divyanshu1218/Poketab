@@ -32,6 +32,7 @@ export const RegisterForm = ({ onSubmit, error, loading }: RegisterFormProps) =>
         formState: { errors },
     } = useForm<RegisterFormData>({
         resolver: zodResolver(registerSchema),
+        mode: 'onBlur', // Validate on blur to avoid interference
     });
 
     const handleFormSubmit = (data: RegisterFormData) => {
@@ -40,11 +41,16 @@ export const RegisterForm = ({ onSubmit, error, loading }: RegisterFormProps) =>
     };
 
     return (
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4" autoComplete="off">
             {error && (
                 <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>{error}</AlertDescription>
+                    <AlertDescription>
+                        {error}
+                        {error.includes('already') && (
+                            <p className="text-xs mt-1">Try a different username or email</p>
+                        )}
+                    </AlertDescription>
                 </Alert>
             )}
 
@@ -54,6 +60,7 @@ export const RegisterForm = ({ onSubmit, error, loading }: RegisterFormProps) =>
                     id="username"
                     type="text"
                     placeholder="ash_ketchum"
+                    autoComplete="off"
                     {...register('username')}
                     disabled={loading}
                 />
@@ -68,6 +75,7 @@ export const RegisterForm = ({ onSubmit, error, loading }: RegisterFormProps) =>
                     id="email"
                     type="email"
                     placeholder="ash@pokemon.com"
+                    autoComplete="off"
                     {...register('email')}
                     disabled={loading}
                 />
@@ -82,6 +90,7 @@ export const RegisterForm = ({ onSubmit, error, loading }: RegisterFormProps) =>
                     id="password"
                     type="password"
                     placeholder="••••••••"
+                    autoComplete="new-password"
                     {...register('password')}
                     disabled={loading}
                 />
@@ -96,6 +105,7 @@ export const RegisterForm = ({ onSubmit, error, loading }: RegisterFormProps) =>
                     id="confirmPassword"
                     type="password"
                     placeholder="••••••••"
+                    autoComplete="new-password"
                     {...register('confirmPassword')}
                     disabled={loading}
                 />

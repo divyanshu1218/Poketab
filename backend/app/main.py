@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.gzip import GZipMiddleware
 from contextlib import asynccontextmanager
 from app.config import settings
 from app.database import init_db
@@ -26,15 +27,21 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# Add GZIP compression middleware FIRST (before other middleware)
+# This compresses responses to reduce bandwidth by ~70%
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
 # Configure CORS
 print(f"Configuring CORS with origins: {settings.CORS_ORIGINS_LIST}")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS_LIST,
-    allow_origin_regex=r"^http://(localhost|127\.0\.0\.1)(:\d+)?$",
+    allow_origin_regex=r"^http://(localhost|127\.0\.0\.1|poketab1218\.netlify\.app)(:\d+)?$",
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["Content-Type", "Authorization"],
+    max_age=600,
 )
 
 # Include routers
