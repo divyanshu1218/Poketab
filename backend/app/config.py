@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     
     # API
     API_V1_PREFIX: str = "/api/v1"
-    CORS_ORIGINS: str = "http://localhost:3000,http://localhost:5173,https://poketab1218.netlify.app,http://127.0.0.1:3000,http://127.0.0.1:5173"
+    CORS_ORIGINS: str = "http://localhost:3000,http://localhost:5173,https://pokedex1218.netlify.app,https://poketab1218.netlify.app,http://127.0.0.1:3000,http://127.0.0.1:5173"
     
     # Rate Limiting
     RATE_LIMIT_SCAN: str = "10/minute"

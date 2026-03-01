@@ -1,10 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exceptions import RequestValidationError
 from starlette.middleware.gzip import GZipMiddleware
+from starlette.responses import JSONResponse
 from contextlib import asynccontextmanager
 from app.config import settings
 from app.database import init_db
 from app.api import auth, pokemon, collection
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -36,12 +41,12 @@ print(f"Configuring CORS with origins: {settings.CORS_ORIGINS_LIST}")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS_LIST,
-    allow_origin_regex=r"^http://(localhost|127\.0\.0\.1|poketab1218\.netlify\.app)(:\d+)?$",
+    allow_origin_regex=r"^(https?://)(localhost|127\.0\.0\.1|poketab1218\.netlify\.app|pokedex1218\.netlify\.app)(:\d+)?$",
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
     allow_headers=["*"],
     expose_headers=["Content-Type", "Authorization"],
-    max_age=600,
+    max_age=3600,
 )
 
 # Include routers
@@ -56,7 +61,13 @@ async def root():
     return {
         "message": "Welcome to PokéTab API",
         "version": "1.0.0",
-        "docs": "/docs"
+        "docs": f"{settings.API_V1_PREFIX}/docs",
+        "notice": "⚠️  API routes require '/api/v1' prefix. Example: POST /api/v1/auth/login",
+        "available_endpoints": {
+            "auth": f"{settings.API_V1_PREFIX}/auth/register, {settings.API_V1_PREFIX}/auth/login",
+            "pokemon": f"{settings.API_V1_PREFIX}/pokemon/scan",
+            "collection": f"{settings.API_V1_PREFIX}/collection"
+        }
     }
 
 
@@ -64,6 +75,22 @@ async def root():
 async def health_check():
     """Health check endpoint"""
     return {"status": "healthy"}
+
+
+@app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"], include_in_schema=False)
+async def catch_all(path: str):
+    """Catch-all handler for debugging CORS and route issues"""
+    return JSONResponse(
+        status_code=404,
+        content={
+            "error": "Endpoint not found",
+            "received_path": f"/{path}",
+            "hint": f"Ensure your API requests use the /api/v1 prefix. For example: /api/v1/auth/login",
+            "cors_enabled": True,
+            "allowed_origins": settings.CORS_ORIGINS_LIST,
+            "documentation": "/docs"
+        }
+    )
 
 
 @app.get("/__whoami")
