@@ -73,8 +73,12 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint"""
-    return {"status": "healthy"}
+    """Health check endpoint - responds immediately without DB"""
+    return {
+        "status": "healthy",
+        "service": "poketab-api",
+        "version": "1.0.0"
+    }
 
 
 @app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"], include_in_schema=False)

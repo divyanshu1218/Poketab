@@ -9,17 +9,17 @@ class Settings(BaseSettings):
     DB_HOST: str = "localhost"
     DB_PORT: int = 3306
     DB_USER: str = "root"
-    DB_PASSWORD: str
+    DB_PASSWORD: str = "password"  # Default for development
     DB_NAME: str = "poketab"
     
     # JWT
-    SECRET_KEY: str
+    SECRET_KEY: str = "your-secret-key-change-in-production"  # Default for development
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     
     # Gemini API
-    GEMINI_API_KEY: str
+    GEMINI_API_KEY: str = ""  # Optional, can be empty
     
     # Redis
     REDIS_HOST: str = "localhost"

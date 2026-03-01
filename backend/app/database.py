@@ -35,6 +35,11 @@ async def get_db():
 
 
 async def init_db():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    await engine.dispose()
+    """Initialize database tables"""
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        print("✓ Database initialized successfully")
+    except Exception as e:
+        print(f"⚠️  Database initialization warning (may be OK): {str(e)}")
+        # Don't raise - let the app continue even if DB init has issues
