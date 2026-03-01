@@ -81,23 +81,26 @@ async def health_check():
     }
 
 
-@app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"], include_in_schema=False)
-async def catch_all(path: str):
-    """Catch-all handler for debugging CORS and route issues"""
-    return JSONResponse(
-        status_code=404,
-        content={
-            "error": "Endpoint not found",
-            "received_path": f"/{path}",
-            "hint": f"Ensure your API requests use the /api/v1 prefix. For example: /api/v1/auth/login",
-            "cors_enabled": True,
-            "allowed_origins": settings.CORS_ORIGINS_LIST,
-            "documentation": "/docs"
-        }
-    )
-
-
 @app.get("/__whoami")
+async def whoami():
+    """Debug endpoint to confirm the running server and config."""
+    try:
+        import bcrypt
+        bcrypt_version = getattr(bcrypt, "__version__", "unknown")
+    except Exception:
+        bcrypt_version = "unavailable"
+    try:
+        import passlib
+        passlib_version = getattr(passlib, "__version__", "unknown")
+    except Exception:
+        passlib_version = "unavailable"
+    return {
+        "app": "poketab-backend",
+        "api_prefix": settings.API_V1_PREFIX,
+        "cors_origins": settings.CORS_ORIGINS_LIST,
+        "bcrypt_version": bcrypt_version,
+        "passlib_version": passlib_version,
+    }
 async def whoami():
     """Debug endpoint to confirm the running server and config."""
     try:

@@ -82,6 +82,26 @@ async def add_to_collection(
     return new_collection_item
 
 
+@router.get("/count")
+async def get_collection_count(
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get count of Pokémon in user's collection"""
+    
+    result = await db.execute(
+        select(func.count(Collection.id))
+        .where(Collection.user_id == current_user.id)
+    )
+    count = result.scalar()
+    
+    return {
+        "count": count,
+        "max": MAX_COLLECTION_SIZE,
+        "remaining": MAX_COLLECTION_SIZE - count
+    }
+
+
 @router.delete("/{collection_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def remove_from_collection(
     collection_id: int,
@@ -110,23 +130,3 @@ async def remove_from_collection(
     await db.commit()
     
     return None
-
-
-@router.get("/count")
-async def get_collection_count(
-    current_user: User = Depends(get_current_active_user),
-    db: AsyncSession = Depends(get_db)
-):
-    """Get count of Pokémon in user's collection"""
-    
-    result = await db.execute(
-        select(func.count(Collection.id))
-        .where(Collection.user_id == current_user.id)
-    )
-    count = result.scalar()
-    
-    return {
-        "count": count,
-        "max": MAX_COLLECTION_SIZE,
-        "remaining": MAX_COLLECTION_SIZE - count
-    }
